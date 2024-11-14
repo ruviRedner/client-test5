@@ -12,11 +12,7 @@ const Attack = () => {
   useEffect(() => {
     dispatch(fatchAction());
   }, []);
- 
 
- 
-  
-  
   return (
     <div>
       <h1>Organization:{data?.username}</h1>
@@ -30,13 +26,11 @@ const Attack = () => {
         <option value="North">North</option>
       </select>
       {data?.org?.resources.length &&
-        data?.org?.resources.map((reso) => 
-           (
-            <button key={reso.name}>
-              {reso.name}*{reso.amount}
-            </button>
-          )
-        )}
+        data?.org?.resources.map((reso) => (
+          <button key={reso.name}>
+            {reso.name}*{reso.amount}
+          </button>
+        ))}
       {actions.data.map((action: Iaction) => (
         <ActionCard key={action._id} act={action} />
       ))}
