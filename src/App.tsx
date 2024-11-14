@@ -7,17 +7,23 @@ import Deffence from "./components/pages/Deffence";
 import EnemyStore from "./components/pages/EnemyStore";
 import IdfStore from "./components/pages/IdfStore";
 import Register from "./components/auth/Register";
-import { useAppDispatch } from "./redux/store";
-import userSlice from "./redux/slices/userSlice";
+import { RootState, useAppDispatch, useAppSelector } from "./redux/store";
+import userSlice, { fatchProfile } from "./redux/slices/userSlice";
+import { socket } from "./main";
+import { Iuser } from "./redux/types/Iuser";
 
 const App = () => {
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    const pUser = JSON.parse(user!);
+    dispatch(fatchProfile(pUser._id));
+    // socket.on("profile", (data:Iuser)=>{
+    //   dispatch(userSlice.actions.setUser(data))
+    //   localStorage.setItem("user", JSON.stringify(data))
+    // })
+  }, []);
   const dispatch = useAppDispatch();
-  useEffect(()=>{
-    const user = localStorage.getItem("user")
-    if(user){
-      dispatch(userSlice.actions.setUser(JSON.parse(user)))
-    }
-  },[dispatch])
+
   return (
     <div>
       <Routes>

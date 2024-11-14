@@ -3,14 +3,19 @@ import { RootState, useAppDispatch, useAppSelector } from "../../redux/store";
 import ActionCard from "./ActionCard";
 import { Iaction } from "../../redux/types/Iaction";
 import { fatchAction } from "../../redux/slices/actionSlice";
+import { fatchProfile } from "../../redux/slices/userSlice";
+import { socket } from "../../main";
+import { Iuser } from "../../redux/types/Iuser";
 
 const Attack = () => {
   
   const dispatch = useAppDispatch();
-  const actions = useAppSelector((state: RootState) => state.action);
+  const actions = useAppSelector((state) => state.action);
   const user = useAppSelector((state) => state.user);
   const [miseilName, setMissieilName] = useState<string>("");
   const [location, setLocation] = useState<string>("");
+  const [remainingTime, setRemainingTime] = useState<number>(0);
+  
   const handelAttack = async () => {
     try {
       const data = await fetch('http://localhost:7966/action/attack', {
@@ -25,17 +30,45 @@ const Attack = () => {
            location:location
         })
       });
-      // dispatch(fatchCandidates());
-      // dispatch(fatchProfile(user.data?._id!));
-      // socket.emit('newVote');
+     await dispatch(fatchAction()); 
+     await dispatch(fatchProfile(user.data?._id!));
+
+      
     } catch (error) {
       console.log(error);
     }
     
   };
+
+  
+ 
+
+  useEffect(() => {
+    
+    socket.on('attackTimer', (data: { location: string, remainingTime: number }) => {
+      if (data.location === location) {
+        setRemainingTime(data.remainingTime); 
+      }
+    });
+    
+  }, [location]);
+
+    
+  //   socket.on('attackHit', (data: { location: string }) => {
+  //     if (data.location === location) {
+  //       alert(""); 
+  //     }
+  //   }) ;return () => {
+  //     socket.off('attackTimer');
+  //     socket.off('attackHit');
+  //   };
+  // }, [location]);
+
   useEffect(() => {
     dispatch(fatchAction());
-  }, []);
+    dispatch(fatchProfile(user.data?._id!));
+  },[]);
+    
 
   return (
     <div>
@@ -50,15 +83,17 @@ const Attack = () => {
         <option value="North">North</option>
       </select>
       {user.data?.org?.resources.length &&
-        user.data?.org?.resources.map((reso) => (
+        user.data?.org.resources.map((reso) => (
           
           
           <button onClick={() => {handelAttack(), setMissieilName(reso.name as string)}}  key={reso.name}>
             {reso.name}*{reso.amount}
           </button>
+          
         ))}
+        <h2>Time remaining: {remainingTime} seconds</h2>
       {actions.data.map((action: Iaction) => (
-        <ActionCard key={action._id} act={action} />
+        <ActionCard key={action._id} act={action} miseilName={miseilName} />
       ))}
     </div>
   );

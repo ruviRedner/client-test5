@@ -37,27 +37,27 @@ import {
     }
   );
   
-//   export const fatchProfile = createAsyncThunk(
-//     'user/profile',
-//     async (id: string, thunkApi) => {
-//       try {
-//         const res = await fetch('http://localhost:7966/api/users/profile', {
-//           method: 'POST',
-//           headers: {
-//             'Content-Type': 'application/json',
-//             Authorization: localStorage['token']!
-//           },
-//           body: JSON.stringify({ id })
-//         });
-//         if (res.status !== 200) thunkApi.rejectWithValue("Can't get profile");
-//         const data = await res.json();
-//         // thunkApi.fulfillWithValue(data)
-//         return data;
-//       } catch (error) {
-//         thunkApi.rejectWithValue('You are yamyyy');
-//       }
-//     }
-//   );
+  export const fatchProfile = createAsyncThunk(
+    'user/profile',
+    async (id: string, thunkApi) => {
+      try {
+        const res = await fetch('http://localhost:7966/users/profile', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            // Authorization: localStorage['token']!
+          },
+          body: JSON.stringify({ id })
+        });
+        if (res.status !== 200) thunkApi.rejectWithValue("Can't get profile");
+        const data = await res.json();
+        // thunkApi.fulfillWithValue(data)
+        return data;
+      } catch (error) {
+        thunkApi.rejectWithValue('You are yamyyy');
+      }
+    }
+  );
   const userSlice = createSlice({
     name: 'user',
     initialState,
@@ -92,9 +92,9 @@ import {
           state.data = null;
         })
   
-        // .addCase(fatchProfile.fulfilled, (state, action) => {
-        //   state.data = { ...state.data, ...action.payload };
-        // });
+        .addCase(fatchProfile.fulfilled, (state, action) => {
+          state.data = { ...state.data, ...action.payload };
+        });
     }
   });
   
