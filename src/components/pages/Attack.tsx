@@ -12,9 +12,7 @@ const Attack = () => {
   useEffect(() => {
     dispatch(fatchAction());
   }, []);
-  console.log("User data:", data);
-  console.log("User resources:", data?.org?.resources);
-  console.log("Actions data:", actions.data);
+ 
 
  
   
