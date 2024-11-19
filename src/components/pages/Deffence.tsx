@@ -1,40 +1,65 @@
 import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../redux/store";
-import { socket } from "../../main";
+import ActionCard from "./ActionCard";
 import { fatchAction } from "../../redux/slices/actionSlice";
 import { fatchProfile } from "../../redux/slices/userSlice";
-import { StatusAction } from "../../redux/types/Iaction";
+import { socket } from "../../main";
+import { Iaction } from "../../redux/types/Iaction";
 
 const Deffence = () => {
   const dispatch = useAppDispatch();
   const actions = useAppSelector((state) => state.action);
   const user = useAppSelector((state) => state.user);
-  const [remainingTime, setRemainingTime] = useState<number>(0);
+  const [timers, setTimers] = useState<{ [key: string]: number }>({});
+  
 
   useEffect(() => {
     socket.on(
       "attackTimer",
-      (data: { location: string; remainingTime: number }) => {
-        setRemainingTime(data.remainingTime);
+      (data: { actionID: string; remainingTime: number }) => {
+        console.log("Received attackTimer data:", data);
+        setTimers((prevTimers) => ({
+          ...prevTimers,
+          [data.actionID]: data.remainingTime,
+        }));
+        dispatch(fatchAction());
       }
     );
-  }, []);
+
+    return () => {
+      socket.off("attackTimer");
+    };
+  }, [dispatch]);
+
   useEffect(() => {
     dispatch(fatchAction());
     dispatch(fatchProfile(user.data?._id!));
-  }, []);
+  }, [dispatch]);
+
   return (
-    <div>
-      {actions.data.map((act) => (
-        <div key={act._id}>
-        <p >status:{act.status}</p>
-        {act.status == StatusAction.lanched && <button>X</button>}
-        </div>
-        
-       
-      ))}
-      
-      <h2>Time remaining: {remainingTime} seconds</h2>
+    <div  className="j">
+      <h4 style={{ padding: "10px" }}>Organization: {user.data?.org?.orgName}</h4>
+      <table  className="action-card-table">
+        <thead>
+          <tr>
+            <th>Time To Hit</th>
+            <th>Rocket</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {actions.data.map((action: Iaction,index) =>{
+            const misseil = user.data?.org?.resources?.[index]
+             return (
+            <ActionCard
+              key={action._id}
+              act={action}
+              timeLeft={timers[action._id]}
+              missileName={misseil ? misseil.name : "no misseil"}
+            />
+          )})}
+        </tbody>
+      </table>
     </div>
   );
 };

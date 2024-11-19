@@ -1,22 +1,45 @@
-import React from 'react'
-import { Iaction } from '../../redux/types/Iaction'
-interface Props{
-    act:Iaction
-    miseilName:string
-    
-}
-const ActionCard = ({act,miseilName}:Props) => {
-    
-     
-  return (
-    <div className='p'>
-       
-      <p>{act.timeHit}</p>
-      <p>{act.status}</p>
-      <p>{miseilName}</p>
-      <h1></h1>
-    </div>
-  )
+import React from "react";
+import { Iaction } from "../../redux/types/Iaction";
+import { useAppSelector } from "../../redux/store";
+import { socket } from "../../main";
+
+interface ActionCardProps {
+  act: Iaction;
+  timeLeft: number | undefined;
+  missileName?: string | null;
 }
 
-export default ActionCard
+const ActionCard: React.FC<ActionCardProps> = ({
+  act,
+  timeLeft,
+  missileName,
+}) => {
+  const displayTime = timeLeft === 0 ? "finish" : timeLeft;
+  const user = useAppSelector((state) => state.user);
+  // const handelDeffence = () => {
+  //   socket.emit("defence", {
+  //     interceptId: user.data?._id,
+  //     misseil: missileName,
+  //     targetId: act._id,
+  //   });
+  // };
+
+  return (
+    <tr>
+      <td>{displayTime !== undefined ? `${displayTime}` : "finish"}</td>
+      <td>
+        {user.data?.role === "terrorist" ? (
+          act.misseilName
+        ) : (
+          <>
+            {missileName}
+            <button style={{ width: "20px", backgroundColor: "red" }}>X</button>
+          </>
+        )}
+      </td>
+      <td>{act.status}</td>
+    </tr>
+  );
+};
+
+export default ActionCard;

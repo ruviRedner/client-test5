@@ -1,101 +1,116 @@
 import React, { useEffect, useState } from "react";
-import { RootState, useAppDispatch, useAppSelector } from "../../redux/store";
+import { useAppDispatch, useAppSelector } from "../../redux/store";
 import ActionCard from "./ActionCard";
-import { Iaction } from "../../redux/types/Iaction";
 import { fatchAction } from "../../redux/slices/actionSlice";
 import { fatchProfile } from "../../redux/slices/userSlice";
 import { socket } from "../../main";
-import { Iuser } from "../../redux/types/Iuser";
+import { Iaction } from "../../redux/types/Iaction";
 
 const Attack = () => {
-  
   const dispatch = useAppDispatch();
   const actions = useAppSelector((state) => state.action);
   const user = useAppSelector((state) => state.user);
-  const [miseilName, setMissieilName] = useState<string>("");
   const [location, setLocation] = useState<string>("");
-  const [remainingTime, setRemainingTime] = useState<number>(0);
-  
-  const handelAttack = async () => {
+  const [timers, setTimers] = useState<{ [key: string]: number }>({});
+
+  const handelAttack = async (missileName: string) => {
     try {
-      const data = await fetch('http://localhost:7966/action/attack', {
-        method: 'POST',
+      const response = await fetch("http://localhost:7966/action/attack", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          // Authorization: localStorage['token']!
+          "Content-Type": "application/json",
+          authorization: localStorage["token"],
         },
         body: JSON.stringify({
-           teroristId:user.data?._id,
-           misseil:miseilName,
-           location:location
-        })
+          teroristId: user.data?._id,
+          misseil: missileName,
+          location: location,
+        }),
       });
-     await dispatch(fatchAction()); 
-     await dispatch(fatchProfile(user.data?._id!));
 
-      
+      const result = await response.json();
+
+      if (response.ok) {
+        console.log("Attack created:", result);
+        await dispatch(fatchAction());
+        await dispatch(fatchProfile(user.data?._id!));
+      } else {
+        console.error("Failed to create attack:", result);
+      }
     } catch (error) {
-      console.log(error);
+      console.error("Error in handelAttack:", error);
     }
-    
   };
 
-  
- 
+  useEffect(() => {
+    socket.on(
+      "attackTimer",
+      (data: {  remainingTime: number; actionID: string }) => {
+        
+        
+          setTimers((prevTimers) => ({
+            ...prevTimers,
+            [data.actionID]: data.remainingTime,
+            
+          }));
+          dispatch(fatchAction());
+          
+        }
+      
+    );
+
+    return () => {
+      socket.off("attackTimer");
+    };
+  }, []);
 
   useEffect(() => {
-    
-    socket.on('attackTimer', (data: { location: string, remainingTime: number }) => {
-      if (data.location === location) {
-        setRemainingTime(data.remainingTime); 
-      }
-    });
-    
-  }, [location]);
-
-    
-  //   socket.on('attackHit', (data: { location: string }) => {
-  //     if (data.location === location) {
-  //       alert(""); 
-  //     }
-  //   }) ;return () => {
-  //     socket.off('attackTimer');
-  //     socket.off('attackHit');
-  //   };
-  // }, [location]);
-
-  useEffect(() => {
-    dispatch(fatchAction());
+    // dispatch(fatchAction());
     dispatch(fatchProfile(user.data?._id!));
-  },[]);
-    
+  }, [dispatch]);
 
   return (
-    <div>
-      <h1>Organization:{user.data?.username}</h1>
-      <select onChange={(e) => setLocation(e.target.value)} value={location}>
+    <div className="j">
+      <h4 style={{ padding: "20px" }}>Organization: {user.data?.org?.orgName}</h4>
+      <select style={{padding:"20px",marginLeft:"20px"}} onChange={(e) => setLocation(e.target.value)} value={location}>
         <option value="" disabled>
-          choose location
+          Choose location
         </option>
         <option value="West Bank">West Bank</option>
         <option value="Center">Center</option>
         <option value="South">South</option>
         <option value="North">North</option>
       </select>
-      {user.data?.org?.resources.length &&
-        user.data?.org.resources.map((reso) => (
-          
-          
-          <button onClick={() => {handelAttack(), setMissieilName(reso.name as string)}}  key={reso.name}>
-            {reso.name}*{reso.amount}
-          </button>
-          
-        ))}
-        <h2>Time remaining: {remainingTime} seconds</h2>
-      {actions.data.map((action: Iaction) => (
-        <ActionCard key={action._id} act={action} miseilName={miseilName} />
+      {user.data?.org?.resources?.map((reso) => (
+        <button
+          key={reso.name}
+          onClick={() => handelAttack(reso.name!)}
+          disabled={!location}
+        >
+          {reso.name} * {reso.amount}
+        </button>
       ))}
-    </div>
+      
+      <table  className="action-card-table">
+        <thead>
+          <tr>
+            <th>Time To Hit</th>
+            <th>Rocket</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {actions.data.map((action: Iaction) => (
+            <ActionCard
+              key={action._id}
+              act={action}
+              timeLeft={timers[action._id]}
+            />
+          ))}
+        </tbody>
+      </table>
+      </div>
+    
   );
 };
 

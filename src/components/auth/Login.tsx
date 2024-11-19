@@ -31,7 +31,7 @@ const Login = () => {
     
   }
   return (
-    <div className="login-page">
+    <div className="inp">
            <input
         type='text'
         placeholder='username'
