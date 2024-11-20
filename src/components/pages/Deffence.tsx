@@ -48,14 +48,14 @@ const Deffence = () => {
           </tr>
         </thead>
         <tbody>
-          {actions.data.map((action: Iaction,index) =>{
-            const misseil = user.data?.org?.resources?.[index]
+          {actions.data.map((action: Iaction) =>{
+            
              return (
             <ActionCard
               key={action._id}
               act={action}
               timeLeft={timers[action._id]}
-              missileName={misseil ? misseil.name : "no misseil"}
+              
             />
           )})}
         </tbody>

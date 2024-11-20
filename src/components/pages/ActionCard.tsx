@@ -6,13 +6,13 @@ import { socket } from "../../main";
 interface ActionCardProps {
   act: Iaction;
   timeLeft: number | undefined;
-  missileName?: string | null;
+
 }
 
 const ActionCard: React.FC<ActionCardProps> = ({
   act,
   timeLeft,
-  missileName,
+  
 }) => {
   const displayTime = timeLeft === 0 ? "finish" : timeLeft;
   const user = useAppSelector((state) => state.user);
@@ -32,7 +32,7 @@ const ActionCard: React.FC<ActionCardProps> = ({
           act.misseilName
         ) : (
           <>
-            {missileName}
+            {act.misseilName}
             <button style={{ width: "20px", backgroundColor: "red" }}>X</button>
           </>
         )}

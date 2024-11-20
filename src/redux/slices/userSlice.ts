@@ -27,7 +27,7 @@ import {
         if (res.status !== 200) thunkApi.rejectWithValue("Can't login");
         const data = await res.json();
   
-        localStorage.setItem('token', data.token);
+        localStorage.setItem('Authorization', data.token);
         localStorage.setItem("user",JSON.stringify(data))
   
         return data;

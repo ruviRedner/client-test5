@@ -14,12 +14,13 @@ const Attack = () => {
   const [timers, setTimers] = useState<{ [key: string]: number }>({});
 
   const handelAttack = async (missileName: string) => {
+    const token = localStorage.getItem("Authorization")
     try {
       const response = await fetch("http://localhost:7966/action/attack", {
-        method: "POST",
+        method: "post",
         headers: {
           "Content-Type": "application/json",
-          authorization: localStorage["token"],
+          Authorization:token!,
         },
         body: JSON.stringify({
           teroristId: user.data?._id,
@@ -27,12 +28,14 @@ const Attack = () => {
           location: location,
         }),
       });
+      
+      
 
       const result = await response.json();
 
       if (response.ok) {
         console.log("Attack created:", result);
-        await dispatch(fatchAction());
+        // await dispatch(fatchAction());
         await dispatch(fatchProfile(user.data?._id!));
       } else {
         console.error("Failed to create attack:", result);
@@ -67,7 +70,7 @@ const Attack = () => {
   useEffect(() => {
     // dispatch(fatchAction());
     dispatch(fatchProfile(user.data?._id!));
-  }, [dispatch]);
+  }, []);
 
   return (
     <div className="j">

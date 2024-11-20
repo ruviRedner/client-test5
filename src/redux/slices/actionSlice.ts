@@ -16,12 +16,15 @@ import {
   export const fatchAction = createAsyncThunk(
     '/action/getAction',
     async (_, thunkApi) => {
-    //   const token = localStorage.getItem('token');
+      const token = localStorage.getItem('Authorization');
+      
+      
       try {
-        const res = await fetch('http://localhost:7966/action/getAction', 
-        //   headers: {
-        //     Authorization: token!
-        //   }
+        const res = await fetch('http://localhost:7966/action/getAction',{ 
+          headers: {
+            Authorization: token!
+          }
+        }
         );
         if (res.status !== 200) thunkApi.rejectWithValue("Can't get list");
         const data = await res.json();
